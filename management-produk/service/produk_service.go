@@ -1,0 +1,11 @@
+package service
+
+import (
+	"context"
+	"management-produk/model/web"
+)
+
+type ProdukServcie interface {
+	GetAllProduk(ctx context.Context)([]web.ProdukResponse,error)
+	CreateProduk(ctx context.Context,produk web.ProdukRequest)(web.ProdukResponse,error)
+}

@@ -1,0 +1,136 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Produk RESTful API",
+    "description": "API Spec for Produk RESTful API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/produk/getAllProduk": {
+      "get": {
+        "security": [{
+          "ProdukAuth" : []
+        }],
+        "tags": [
+          "Produk API"
+        ],
+        "description": "List all Produk",
+        "summary": "List all Produk",
+        "responses": {
+          "200": {
+            "description": "Success get all produk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Produk"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/produk/CreateProduk": {
+      "post": {
+        "security": [{
+          "ProdukAuth" : []
+        }],
+        "tags": ["Produk API"],
+        "description": "Create new Produk",
+        "summary": "Create new Produk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrUpdateProduk"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Create Produk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code" : {
+                      "type": "number"
+                    },
+                    "status" : {
+                      "type": "string"
+                    },
+                    "data" : {
+                      "$ref": "#/components/schemas/Produk"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ProdukAuth" : {
+        "type": "apiKey",
+        "in" : "header",
+        "name": "X-API-Key",
+        "description": "Authentication for Produk API"
+      }
+    },
+    "schemas": {
+      "CreateOrUpdateProduk" : {
+        "type": "object",
+        "properties": {
+          "nama": {
+            "type": "string"
+          },
+          "harga": {
+            "type": "number"
+          }
+        }
+      },
+      "Produk" : {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "nama": {
+            "type": "string"
+          },
+          "harga": {
+            "type": "number"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
