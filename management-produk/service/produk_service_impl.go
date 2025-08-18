@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"management-produk/helper"
 	"management-produk/model/domain"
 	"management-produk/model/web"
@@ -52,4 +53,34 @@ func(service *ProdukServcieImpl)CreateProduk(ctx context.Context,produk web.Prod
     }
 	helper.PanicIfError(err)
 	return helper.ToProdukResponse(response),nil
+}
+
+func(service *ProdukServcieImpl)GetById(ctx context.Context,IdProduk int)(web.ProdukResponse,error){
+	tx,err := service.DB.Begin()
+	if err != nil {
+		return web.ProdukResponse{},errors.New(err.Error())
+	}
+	response,err := service.ProdukRepository.GetById(ctx,tx,IdProduk)
+	if err != nil {
+		return web.ProdukResponse{},errors.New(err.Error())
+	}
+	return helper.ToProdukResponse(response),nil
+}
+
+func(service *ProdukServcieImpl)Delete(ctx context.Context,idProduk int)error{
+	tx,err := service.DB.Begin()
+	if err != nil {
+		return err
+	}
+	err = service.ProdukRepository.Delete(ctx, tx, idProduk)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }

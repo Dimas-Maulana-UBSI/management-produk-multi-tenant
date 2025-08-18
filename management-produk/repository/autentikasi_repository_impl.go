@@ -24,7 +24,7 @@ func (repository *AutentikasiRepositoryImpl) CreateDb(ctx context.Context, tx *s
 	CREATE TABLE IF NOT EXISTS %s.produk (
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		nama VARCHAR(100) NOT NULL,
-		harga DECIMAL(10,2) NOT NULL,
+		harga int(11) NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 	`, tenant.DBName)
