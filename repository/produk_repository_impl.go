@@ -83,3 +83,23 @@ func(repository *ProdukRepositoryImpl)Delete(ctx context.Context,tx *sql.Tx,idPr
 	return nil
 	
 }
+
+func(repository *ProdukRepositoryImpl)Update(ctx context.Context,tx *sql.Tx,idProduk int,produk domain.Produk)(domain.Produk,error){
+	dbName := ctx.Value("db_name").(string)
+	fmt.Println(idProduk)
+	fmt.Println(produk)
+	query := fmt.Sprintf("update %s.produk set id=?,nama=?,harga=? where id=?",dbName)
+	row,err := tx.ExecContext(ctx,query,idProduk,produk.Nama,produk.Harga,idProduk)
+	if err != nil {
+		return domain.Produk{},err
+	}
+	rowAffected,err := row.RowsAffected()
+	if err != nil {
+		return domain.Produk{},err
+	}
+	if rowAffected == 0{
+		return domain.Produk{},err
+	}
+	produk.Id = idProduk
+	return produk,nil
+}

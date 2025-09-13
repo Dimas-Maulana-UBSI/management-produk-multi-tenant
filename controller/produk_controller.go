@@ -7,4 +7,5 @@ type ProdukController interface {
 	CreateProduk(ctx *fiber.Ctx)error
 	GetById(ctx *fiber.Ctx)error
 	Delete(ctx *fiber.Ctx)error
+	Update(ctx *fiber.Ctx)error
 }

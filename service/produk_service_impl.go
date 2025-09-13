@@ -84,3 +84,24 @@ func(service *ProdukServcieImpl)Delete(ctx context.Context,idProduk int)error{
 	}
 	return nil
 }
+
+func(service *ProdukServcieImpl)Update(ctx context.Context,idProduk int,produk web.ProdukRequest)(web.ProdukResponse,error){
+	tx,err := service.DB.Begin()
+	if err != nil {
+		return web.ProdukResponse{},err
+	}
+
+	request := domain.Produk{
+		Nama: produk.Name,
+		Harga: produk.Harga,
+	}
+	response,err := service.ProdukRepository.Update(ctx,tx,idProduk,request)
+	if err != nil {
+		return web.ProdukResponse{},err
+	}
+	err = tx.Commit()
+    if err != nil {
+        return web.ProdukResponse{}, err
+    }
+	return helper.ToProdukResponse(response),nil
+}

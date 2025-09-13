@@ -24,5 +24,6 @@ func NewProdukRouter(app *fiber.App,dbMaster *sql.DB){
 	produkGroup.Get("/:idProduk",produkController.GetById)
 	produkGroup.Post("/",produkController.CreateProduk)
 	produkGroup.Delete("/:idProduk",produkController.Delete)
+	produkGroup.Put("/:idProduk",produkController.Update)
 
 }

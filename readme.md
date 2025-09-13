@@ -27,6 +27,9 @@ POST
 DELETE
 /produk/1 untuk menghapus produk berdasarkan id misalnya 1
 
+PUT
+/produk/1 untuk update produk
+
 struktur jsonnya
 {
     "name":"nama_produk",

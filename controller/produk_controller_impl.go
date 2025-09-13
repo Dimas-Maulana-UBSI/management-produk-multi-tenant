@@ -76,3 +76,22 @@ func(controller *ProdukControllerImpl)Delete(ctx *fiber.Ctx)error{
 		Data: "",
 	})
 }
+
+func(controller *ProdukControllerImpl)Update(ctx *fiber.Ctx)error{
+	var produk web.ProdukRequest
+	err := ctx.BodyParser(&produk)
+	idProduk,err := strconv.Atoi(ctx.Params("idProduk"))
+	response,err := controller.ProdukServcie.Update(ctx.Context(),idProduk,produk)
+	if err != nil {
+		return ctx.JSON(web.WebResponse{
+			Status: 404,
+			Message: err.Error(),
+			Data: "",
+		})
+	}
+	return ctx.JSON(web.WebResponse{
+		Status: 200,
+		Message: "success",
+		Data: response,
+	})
+}
