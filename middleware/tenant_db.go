@@ -1,16 +1,16 @@
 package middleware
 
 import (
-	"management-produk/helper"
+	"context"
 	"management-produk/service"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 )
 
-
-
 func TenantMiddleware(tenantService service.TenantService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+
 		apiKey := c.Get("X-API-Key")
 		if apiKey == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -18,16 +18,20 @@ func TenantMiddleware(tenantService service.TenantService) fiber.Handler {
 			})
 		}
 
-		tenantInfo, err := tenantService.GetInfoTenant(c.Context(), apiKey)
+		tenantInfo, err := tenantService.GetInfoTenant(c.UserContext(), apiKey)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid API key",
 			})
 		}
+		ctx := context.WithValue(
+			c.UserContext(),
+			"db_name",
+			tenantInfo.DBName,
+		)
 
-		// buat DSN
-		helper.PanicIfError(err)
-		c.Locals("db_name",tenantInfo.DBName)
+		c.SetUserContext(ctx)
+
 		return c.Next()
 	}
 }

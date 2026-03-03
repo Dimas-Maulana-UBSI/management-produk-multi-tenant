@@ -9,7 +9,10 @@ import (
 	"management-produk/model/web"
 	"management-produk/repository"
 )
-
+const (
+	DefaultLimit = 10
+	MaxLimit = 30
+)
 type ProdukServcieImpl struct {
 	ProdukRepository repository.ProdukRepository
 	DB *sql.DB
@@ -22,18 +25,60 @@ func NewProdukService(repository repository.ProdukRepository,db *sql.DB)ProdukSe
 	}
 }
 
-func (service *ProdukServcieImpl)GetAllProduk(ctx context.Context)([]web.ProdukResponse,error){
-	tx,err := service.DB.Begin()
-	if err != nil {
-		panic(err)
-	}
-	response,err := service.ProdukRepository.GetAllProduk(ctx,tx)
-	helper.PanicIfError(err)
-	produks := []web.ProdukResponse{}
-	for _,produk := range response {
-		produks = append(produks, helper.ToProdukResponse(produk))
-	}
-	return produks,nil
+func (service *ProdukServcieImpl)GetAllProduk(ctx context.Context,limit int,page int)(web.ProdukPaginationResponse,error){
+	tx, err := service.DB.Begin()
+    if err != nil {
+        return web.ProdukPaginationResponse{}, err
+    }
+    defer tx.Rollback()
+
+    if limit <= 0 {
+        limit = DefaultLimit
+    }
+
+    if limit > MaxLimit {
+        limit = MaxLimit
+    }
+
+    if page <= 0 {
+        page = 1
+    }
+
+    offset := (page - 1) * limit
+
+    result, err := service.ProdukRepository.
+        GetAllProduk(ctx, tx, limit, offset)
+    if err != nil {
+        return web.ProdukPaginationResponse{}, err
+    }
+
+    totalData, err := service.ProdukRepository.
+        CountProduk(ctx, tx)
+    if err != nil {
+        return web.ProdukPaginationResponse{}, err
+    }
+
+    totalPage := 0
+    if totalData > 0 {
+        totalPage = (totalData + limit - 1) / limit
+    }
+
+    var produks []web.ProdukResponse
+    for _, produk := range result {
+        produks = append(produks, helper.ToProdukResponse(produk))
+    }
+
+    if err := tx.Commit(); err != nil {
+        return web.ProdukPaginationResponse{}, err
+    }
+
+    return web.ProdukPaginationResponse{
+        Data:      produks,
+        Page:      page,
+        Limit:     limit,
+        TotalData: totalData,
+        TotalPage: totalPage,
+    }, nil
 }
 
 func(service *ProdukServcieImpl)CreateProduk(ctx context.Context,produk web.ProdukRequest)(web.ProdukResponse,error){

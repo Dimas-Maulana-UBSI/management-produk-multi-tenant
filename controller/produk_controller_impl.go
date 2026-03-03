@@ -21,8 +21,9 @@ func NewProdukController(service service.ProdukServcie)ProdukController{
 }
 
 func(controller *ProdukControllerImpl)GetProduk(ctx *fiber.Ctx)error{
-	response,err := controller.ProdukServcie.GetAllProduk(ctx.Context())
-	fmt.Println("dari get all")
+	limit, _ := strconv.Atoi(ctx.Query("limit"))
+	page, _  := strconv.Atoi(ctx.Query("page"))
+	response,err := controller.ProdukServcie.GetAllProduk(ctx.UserContext(),limit,page)
 	helper.PanicIfError(err)
 	return ctx.JSON(web.WebResponse{
 		Status: 200,
@@ -35,7 +36,7 @@ func(controller *ProdukControllerImpl)CreateProduk(ctx *fiber.Ctx)error{
 	var produk web.ProdukRequest
 	err := ctx.BodyParser(&produk)
 	helper.PanicIfError(err)
-	response,err := controller.ProdukServcie.CreateProduk(ctx.Context(),produk)
+	response,err := controller.ProdukServcie.CreateProduk(ctx.UserContext(),produk)
 	helper.PanicIfError(err)
 	return ctx.JSON(web.WebResponse{
 		Status: 200,
@@ -47,7 +48,7 @@ func(controller *ProdukControllerImpl)CreateProduk(ctx *fiber.Ctx)error{
 func(controller *ProdukControllerImpl)GetById(ctx *fiber.Ctx)error{
 	idProduk,_ := strconv.Atoi(ctx.Params("idProduk"))
 	fmt.Println(idProduk)
-	response,err := controller.ProdukServcie.GetById(ctx.Context(),idProduk)
+	response,err := controller.ProdukServcie.GetById(ctx.UserContext(),idProduk)
 	if err != nil {
 		return ctx.JSON(web.WebResponse{Status: 404,
 		Message: err.Error(),
@@ -62,7 +63,7 @@ func(controller *ProdukControllerImpl)GetById(ctx *fiber.Ctx)error{
 
 func(controller *ProdukControllerImpl)Delete(ctx *fiber.Ctx)error{
 	idProduk,_ := strconv.Atoi(ctx.Params("idProduk"))
-	err := controller.ProdukServcie.Delete(ctx.Context(),idProduk)
+	err := controller.ProdukServcie.Delete(ctx.UserContext(),idProduk)
 	if err != nil {
 		return ctx.JSON(web.WebResponse{
 			Status: 404,
@@ -81,7 +82,7 @@ func(controller *ProdukControllerImpl)Update(ctx *fiber.Ctx)error{
 	var produk web.ProdukRequest
 	err := ctx.BodyParser(&produk)
 	idProduk,err := strconv.Atoi(ctx.Params("idProduk"))
-	response,err := controller.ProdukServcie.Update(ctx.Context(),idProduk,produk)
+	response,err := controller.ProdukServcie.Update(ctx.UserContext(),idProduk,produk)
 	if err != nil {
 		return ctx.JSON(web.WebResponse{
 			Status: 404,

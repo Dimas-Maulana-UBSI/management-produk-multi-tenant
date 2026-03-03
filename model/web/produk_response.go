@@ -6,3 +6,11 @@ type ProdukResponse struct {
 	Harga int
 
 }
+
+type ProdukPaginationResponse struct {
+	Data []ProdukResponse
+	Page int
+	Limit int
+	TotalData int
+	TotalPage int
+}
