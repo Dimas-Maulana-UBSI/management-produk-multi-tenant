@@ -7,6 +7,8 @@ import (
 	"management-produk/model/domain"
 	"management-produk/model/web"
 	"management-produk/repository"
+	"os"
+	"strconv"
 )
 
 type AutentikasiServiceImpl struct {
@@ -49,10 +51,11 @@ func (service AutentikasiServiceImpl) Registrasi(ctx context.Context, request we
 		return web.RegistrasiResponse{}, helper.Internal("gagal memulai transaksi", err)
 	}
 	defer tx.Rollback()
+	dbPort, _ := strconv.Atoi(os.Getenv("DB_PORT"))
 	tenantRequest := domain.Tenant{
 		Name:       request.Name,
-		DBHost:     "localhost",
-		DBPort:     3306,
+		DBHost:     os.Getenv("DB_HOST"),
+		DBPort:     dbPort,
 		ApiKey:     helper.GenerateApiKey(10),
 		DBName:     ("db_" + request.Name),
 		DBUser:     request.Name,

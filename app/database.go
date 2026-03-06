@@ -2,13 +2,21 @@ package app
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
-	"management-produk/helper"
+	"fmt"
+	"os"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func NewMasterDB() *sql.DB {
-	dsn := "root@tcp(localhost:3306)/tenants?parseTime=true"
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -28,9 +36,17 @@ func NewMasterDB() *sql.DB {
 }
 
 func NewTenantDb() *sql.DB {
-	dsn := "root@tcp(localhost:3306)/?parseTime=true"
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?parseTime=true",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+	)
+
 	db, err := sql.Open("mysql", dsn)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(err)
+	}
 
 	db.SetMaxIdleConns(20)
 	db.SetMaxOpenConns(30)
