@@ -11,20 +11,21 @@ import (
 
 type TenantServiceImpl struct {
 	tenantRepository repository.TenantRepository
-	DB *sql.DB
+	DB               *sql.DB
 }
 
 func NewTenantInfoService(repo repository.TenantRepository, db *sql.DB) TenantService {
 	return &TenantServiceImpl{
 		tenantRepository: repo,
-		DB:                db,
+		DB:               db,
 	}
 }
 
-
-func(repository *TenantServiceImpl) GetInfoTenant (ctx context.Context,apiKey string) (web.TenantInfoResponse, error) {
+func (repository *TenantServiceImpl) GetInfoTenant(ctx context.Context, apiKey string) (web.TenantInfoResponse, error) {
 	db := repository.DB
-	response,err := repository.tenantRepository.GetInfoTenant(ctx, db, apiKey)
-	helper.PanicIfError(err)
+	response, err := repository.tenantRepository.GetInfoTenant(ctx, db, apiKey)
+	if err != nil {
+		return web.TenantInfoResponse{}, helper.ToAppError(err)
+	}
 	return helper.ToTenantInfoResponse(*response), nil
 }

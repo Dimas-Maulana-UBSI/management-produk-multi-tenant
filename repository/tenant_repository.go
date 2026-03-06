@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"database/sql"
 	"context"
+	"database/sql"
 	"management-produk/model/domain"
 )
 

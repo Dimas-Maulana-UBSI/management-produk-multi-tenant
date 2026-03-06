@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"management-produk/helper"
 	"management-produk/model/web"
 	"management-produk/service"
@@ -14,85 +13,102 @@ type ProdukControllerImpl struct {
 	ProdukServcie service.ProdukServcie
 }
 
-func NewProdukController(service service.ProdukServcie)ProdukController{
+func NewProdukController(service service.ProdukServcie) ProdukController {
 	return &ProdukControllerImpl{
 		ProdukServcie: service,
 	}
 }
 
-func(controller *ProdukControllerImpl)GetProduk(ctx *fiber.Ctx)error{
-	limit, _ := strconv.Atoi(ctx.Query("limit"))
-	page, _  := strconv.Atoi(ctx.Query("page"))
-	response,err := controller.ProdukServcie.GetAllProduk(ctx.UserContext(),limit,page)
-	helper.PanicIfError(err)
-	return ctx.JSON(web.WebResponse{
-		Status: 200,
+func (controller *ProdukControllerImpl) GetProduk(ctx *fiber.Ctx) error {
+	limit, err := strconv.Atoi(ctx.Query("limit"))
+	if err != nil || limit <= 0 {
+		limit = 0 // biarkan service yang handle default
+	}
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil || page <= 0 {
+		page = 0 // biarkan service yang handle default
+	}
+
+	response, err := controller.ProdukServcie.GetAllProduk(ctx.UserContext(), limit, page)
+	if err != nil {
+		return helper.RespondFiberError(ctx, err)
+	}
+	return ctx.Status(200).JSON(web.WebResponse{
+		Status:  200,
 		Message: "success",
-		Data: response,
+		Data:    response,
 	})
 }
 
-func(controller *ProdukControllerImpl)CreateProduk(ctx *fiber.Ctx)error{
+func (controller *ProdukControllerImpl) CreateProduk(ctx *fiber.Ctx) error {
 	var produk web.ProdukRequest
-	err := ctx.BodyParser(&produk)
-	helper.PanicIfError(err)
-	response,err := controller.ProdukServcie.CreateProduk(ctx.UserContext(),produk)
-	helper.PanicIfError(err)
-	return ctx.JSON(web.WebResponse{
-		Status: 200,
-		Message: "success",
-		Data: response,
-	})
-}
-
-func(controller *ProdukControllerImpl)GetById(ctx *fiber.Ctx)error{
-	idProduk,_ := strconv.Atoi(ctx.Params("idProduk"))
-	fmt.Println(idProduk)
-	response,err := controller.ProdukServcie.GetById(ctx.UserContext(),idProduk)
-	if err != nil {
-		return ctx.JSON(web.WebResponse{Status: 404,
-		Message: err.Error(),
-		Data: ""})
+	if err := ctx.BodyParser(&produk); err != nil {
+		return helper.RespondFiberError(ctx, helper.BadRequest(err.Error()))
 	}
-	return ctx.JSON(web.WebResponse{
-		Status: 200,
-		Message: "success",
-		Data: response,
-	})
-}
 
-func(controller *ProdukControllerImpl)Delete(ctx *fiber.Ctx)error{
-	idProduk,_ := strconv.Atoi(ctx.Params("idProduk"))
-	err := controller.ProdukServcie.Delete(ctx.UserContext(),idProduk)
+	response, err := controller.ProdukServcie.CreateProduk(ctx.UserContext(), produk)
 	if err != nil {
-		return ctx.JSON(web.WebResponse{
-			Status: 404,
-			Message: err.Error(),
-			Data: "",
-		})
+		return helper.RespondFiberError(ctx, err)
 	}
-	return ctx.JSON(web.WebResponse{
-		Status: 200,
+	return ctx.Status(200).JSON(web.WebResponse{
+		Status:  200,
 		Message: "success",
-		Data: "",
+		Data:    response,
 	})
 }
 
-func(controller *ProdukControllerImpl)Update(ctx *fiber.Ctx)error{
+func (controller *ProdukControllerImpl) GetById(ctx *fiber.Ctx) error {
+	idProduk, err := strconv.Atoi(ctx.Params("idProduk"))
+	if err != nil {
+		return helper.RespondFiberError(ctx, helper.BadRequest("idProduk harus berupa angka"))
+	}
+
+	response, err := controller.ProdukServcie.GetById(ctx.UserContext(), idProduk)
+	if err != nil {
+		return helper.RespondFiberError(ctx, err)
+	}
+	return ctx.Status(200).JSON(web.WebResponse{
+		Status:  200,
+		Message: "success",
+		Data:    response,
+	})
+}
+
+func (controller *ProdukControllerImpl) Delete(ctx *fiber.Ctx) error {
+	idProduk, err := strconv.Atoi(ctx.Params("idProduk"))
+	if err != nil {
+		return helper.RespondFiberError(ctx, helper.BadRequest("idProduk harus berupa angka"))
+	}
+
+	err = controller.ProdukServcie.Delete(ctx.UserContext(), idProduk)
+	if err != nil {
+		return helper.RespondFiberError(ctx, err)
+	}
+	return ctx.Status(200).JSON(web.WebResponse{
+		Status:  200,
+		Message: "success",
+		Data:    "",
+	})
+}
+
+func (controller *ProdukControllerImpl) Update(ctx *fiber.Ctx) error {
 	var produk web.ProdukRequest
-	err := ctx.BodyParser(&produk)
-	idProduk,err := strconv.Atoi(ctx.Params("idProduk"))
-	response,err := controller.ProdukServcie.Update(ctx.UserContext(),idProduk,produk)
-	if err != nil {
-		return ctx.JSON(web.WebResponse{
-			Status: 404,
-			Message: err.Error(),
-			Data: "",
-		})
+	if err := ctx.BodyParser(&produk); err != nil {
+		return helper.RespondFiberError(ctx, helper.BadRequest(err.Error()))
 	}
-	return ctx.JSON(web.WebResponse{
-		Status: 200,
+
+	idProduk, err := strconv.Atoi(ctx.Params("idProduk"))
+	if err != nil {
+		return helper.RespondFiberError(ctx, helper.BadRequest("idProduk harus berupa angka"))
+	}
+
+	response, err := controller.ProdukServcie.Update(ctx.UserContext(), idProduk, produk)
+	if err != nil {
+		return helper.RespondFiberError(ctx, err)
+	}
+	return ctx.Status(200).JSON(web.WebResponse{
+		Status:  200,
 		Message: "success",
-		Data: response,
+		Data:    response,
 	})
 }

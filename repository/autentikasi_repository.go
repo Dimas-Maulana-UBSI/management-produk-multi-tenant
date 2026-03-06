@@ -7,7 +7,7 @@ import (
 )
 
 type AutentikasiRepository interface {
-	CreateDb(ctx context.Context,tx *sql.Tx, tenant domain.Tenant) (domain.Tenant,error)
-	CreateUser(ctx context.Context,tx *sql.Tx, tenant domain.Tenant)(domain.Tenant,error)
-	GetUser(ctx context.Context,tx *sql.Tx,tenant domain.Tenant)(domain.Tenant,error)
+	CreateDb(ctx context.Context, tx *sql.Tx, tenant domain.Tenant) (domain.Tenant, error)
+	CreateUser(ctx context.Context, tx *sql.Tx, tenant domain.Tenant) (domain.Tenant, error)
+	GetUser(ctx context.Context, tx *sql.Tx, tenant domain.Tenant) (domain.Tenant, error)
 }

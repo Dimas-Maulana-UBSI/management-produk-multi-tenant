@@ -11,125 +11,139 @@
     }
   ],
   "paths": {
-    "/produk/getAllProduk": {
+    "/produk": {
       "get": {
-        "security": [{
-          "ProdukAuth" : []
-        }],
-        "tags": [
-          "Produk API"
+        "security": [{ "ProdukAuth": [] }],
+        "tags": ["Produk"],
+        "description": "List Produk with pagination",
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 }},
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }}
         ],
-        "description": "List all Produk",
-        "summary": "List all Produk",
         "responses": {
-          "200": {
-            "description": "Success get all produk",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Produk"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponsePagination" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } }
+        }
+      },
+      "post": {
+        "security": [{ "ProdukAuth": [] }],
+        "tags": ["Produk"],
+        "description": "Create a new Produk",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProdukRequest" } } } },
+        "responses": {
+          "200": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponseSingleProduk" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } }
         }
       }
     },
-    "/produk/CreateProduk": {
-      "post": {
-        "security": [{
-          "ProdukAuth" : []
-        }],
-        "tags": ["Produk API"],
-        "description": "Create new Produk",
-        "summary": "Create new Produk",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrUpdateProduk"
-              }
-            }
-          }
-        },
+    "/produk/{id}": {
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+      "get": {
+        "security": [{ "ProdukAuth": [] }],
+        "tags": ["Produk"],
+        "description": "Get produk by id",
         "responses": {
-          "200": {
-            "description": "Success Create Produk",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code" : {
-                      "type": "number"
-                    },
-                    "status" : {
-                      "type": "string"
-                    },
-                    "data" : {
-                      "$ref": "#/components/schemas/Produk"
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponseSingleProduk" } } } },
+          "404": { "description": "Not Found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } }
+        }
+      },
+      "put": {
+        "security": [{ "ProdukAuth": [] }],
+        "tags": ["Produk"],
+        "description": "Update produk",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProdukRequest" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponseSingleProduk" } } } },
+          "404": { "description": "Not Found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } }
+        }
+      },
+      "delete": {
+        "security": [{ "ProdukAuth": [] }],
+        "tags": ["Produk"],
+        "description": "Delete produk",
+        "responses": {
+          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } },
+          "404": { "description": "Not Found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebResponse" } } } }
         }
       }
     }
   },
   "components": {
     "securitySchemes": {
-      "ProdukAuth" : {
+      "ProdukAuth": {
         "type": "apiKey",
-        "in" : "header",
+        "in": "header",
         "name": "X-API-Key",
-        "description": "Authentication for Produk API"
+        "description": "API Key for tenant scoping"
       }
     },
     "schemas": {
-      "CreateOrUpdateProduk" : {
+      "WebResponse": {
         "type": "object",
         "properties": {
-          "nama": {
-            "type": "string"
-          },
-          "harga": {
-            "type": "number"
-          }
+          "status": { "type": "integer" },
+          "message": { "type": "string" },
+          "data": { "type": "object" }
         }
       },
-      "Produk" : {
+      "Produk": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "number"
-          },
-          "nama": {
-            "type": "string"
-          },
-          "harga": {
-            "type": "number"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "integer" },
+          "nama": { "type": "string" },
+          "harga": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" }
         }
+      },
+      "ProdukRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "harga": { "type": "integer" }
+        },
+        "required": ["name", "harga"]
+      },
+      "ProdukPaginationResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Produk" } },
+          "page": { "type": "integer" },
+          "limit": { "type": "integer" },
+          "totalData": { "type": "integer" },
+          "totalPage": { "type": "integer" }
+        }
+      },
+      "WebResponsePagination": {
+        "allOf": [ { "$ref": "#/components/schemas/WebResponse" }, { "properties": { "data": { "$ref": "#/components/schemas/ProdukPaginationResponse" } } } ]
+      },
+      "WebResponseSingleProduk": {
+        "allOf": [ { "$ref": "#/components/schemas/WebResponse" }, { "properties": { "data": { "$ref": "#/components/schemas/Produk" } } } ]
+      },
+      "WebResponseLogin": {
+        "allOf": [ { "$ref": "#/components/schemas/WebResponse" }, { "properties": { "data": { "type": "object", "properties": { "name": { "type": "string" }, "api_key": { "type": "string" } } } } } ]
+      },
+      "WebResponseRegistrasi": {
+        "allOf": [ { "$ref": "#/components/schemas/WebResponse" }, { "properties": { "data": { "type": "object", "properties": { "name": { "type": "string" }, "api_key": { "type": "string" }, "db_name": { "type": "string" } } } } } ]
+      },
+      "WebResponseTenant": {
+        "allOf": [ { "$ref": "#/components/schemas/WebResponse" }, { "properties": { "data": { "type": "object", "properties": { "id": { "type": "integer" }, "name": { "type": "string" }, "api_key": { "type": "string" }, "db_name": { "type": "string" }, "status": { "type": "string" } } } } } ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "required": ["name", "password"]
+      },
+      "RegistrasiRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "required": ["name", "password"]
       }
     }
   }

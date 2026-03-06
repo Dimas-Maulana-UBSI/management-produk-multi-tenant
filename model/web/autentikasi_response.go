@@ -1,13 +1,12 @@
 package web
 
 type RegistrasiResponse struct {
-	Name string
+	Name   string
 	ApiKey string
 	Status string
 }
 type LoginResponse struct {
-	Name string
-	ApiKey string
+	Name     string
+	ApiKey   string
 	Password string
 }
-

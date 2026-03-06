@@ -10,7 +10,7 @@ package repository
 
 // 	"github.com/stretchr/testify/assert"
 // )
-// var db = app.NewMasterDB() 
+// var db = app.NewMasterDB()
 // var authRepository = NewAutentikasiRepository()
 
 // func TestAuhtRepo(t *testing.T){
@@ -22,7 +22,7 @@ package repository
 // 		DBHost: "localhost",
 // 		DBPort: 3306,
 // 		DBName: "tes_test",
-		
+
 // 	}
 // 	tenant,err:= authRepository.CreateDb(ctx,tx,tenantRequest)
 // 	tx.Commit()

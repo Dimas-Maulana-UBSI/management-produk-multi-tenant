@@ -6,9 +6,9 @@ import (
 )
 
 type ProdukServcie interface {
-	GetAllProduk(ctx context.Context,limit int,page int)(web.ProdukPaginationResponse,error)
-	CreateProduk(ctx context.Context,produk web.ProdukRequest)(web.ProdukResponse,error)
-	GetById(ctx context.Context,IdProduk int)(web.ProdukResponse,error)
-	Delete(ctx context.Context,idProduk int)error
-	Update(ctx context.Context,idProduk int,produk web.ProdukRequest)(web.ProdukResponse,error)
+	GetAllProduk(ctx context.Context, limit int, page int) (web.ProdukPaginationResponse, error)
+	CreateProduk(ctx context.Context, produk web.ProdukRequest) (web.ProdukResponse, error)
+	GetById(ctx context.Context, IdProduk int) (web.ProdukResponse, error)
+	Delete(ctx context.Context, idProduk int) error
+	Update(ctx context.Context, idProduk int, produk web.ProdukRequest) (web.ProdukResponse, error)
 }

@@ -7,5 +7,5 @@ import (
 
 type TenantService interface {
 	// Define methods that the TenantService should implement
-	GetInfoTenant(ctx context.Context,apiKey string) (web.TenantInfoResponse, error)
+	GetInfoTenant(ctx context.Context, apiKey string) (web.TenantInfoResponse, error)
 }

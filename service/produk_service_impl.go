@@ -3,150 +3,162 @@ package service
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"management-produk/helper"
 	"management-produk/model/domain"
 	"management-produk/model/web"
 	"management-produk/repository"
 )
+
 const (
 	DefaultLimit = 10
-	MaxLimit = 30
+	MaxLimit     = 30
 )
+
 type ProdukServcieImpl struct {
 	ProdukRepository repository.ProdukRepository
-	DB *sql.DB
+	DB               *sql.DB
 }
 
-func NewProdukService(repository repository.ProdukRepository,db *sql.DB)ProdukServcie{
+func NewProdukService(repository repository.ProdukRepository, db *sql.DB) ProdukServcie {
 	return &ProdukServcieImpl{
 		ProdukRepository: repository,
-		DB: db,
+		DB:               db,
 	}
 }
 
-func (service *ProdukServcieImpl)GetAllProduk(ctx context.Context,limit int,page int)(web.ProdukPaginationResponse,error){
+func (service *ProdukServcieImpl) GetAllProduk(ctx context.Context, limit int, page int) (web.ProdukPaginationResponse, error) {
 	tx, err := service.DB.Begin()
-    if err != nil {
-        return web.ProdukPaginationResponse{}, err
-    }
-    defer tx.Rollback()
+	if err != nil {
+		return web.ProdukPaginationResponse{}, helper.Internal("gagal memulai transaksi", err)
+	}
+	defer tx.Rollback()
 
-    if limit <= 0 {
-        limit = DefaultLimit
-    }
+	if limit <= 0 {
+		limit = DefaultLimit
+	}
 
-    if limit > MaxLimit {
-        limit = MaxLimit
-    }
+	if limit > MaxLimit {
+		limit = MaxLimit
+	}
 
-    if page <= 0 {
-        page = 1
-    }
+	if page <= 0 {
+		page = 1
+	}
 
-    offset := (page - 1) * limit
+	offset := (page - 1) * limit
 
-    result, err := service.ProdukRepository.
-        GetAllProduk(ctx, tx, limit, offset)
-    if err != nil {
-        return web.ProdukPaginationResponse{}, err
-    }
+	result, err := service.ProdukRepository.
+		GetAllProduk(ctx, tx, limit, offset)
+	if err != nil {
+		return web.ProdukPaginationResponse{}, helper.ToAppError(err)
+	}
 
-    totalData, err := service.ProdukRepository.
-        CountProduk(ctx, tx)
-    if err != nil {
-        return web.ProdukPaginationResponse{}, err
-    }
+	totalData, err := service.ProdukRepository.
+		CountProduk(ctx, tx)
+	if err != nil {
+		return web.ProdukPaginationResponse{}, helper.ToAppError(err)
+	}
 
-    totalPage := 0
-    if totalData > 0 {
-        totalPage = (totalData + limit - 1) / limit
-    }
+	totalPage := 0
+	if totalData > 0 {
+		totalPage = (totalData + limit - 1) / limit
+	}
 
-    var produks []web.ProdukResponse
-    for _, produk := range result {
-        produks = append(produks, helper.ToProdukResponse(produk))
-    }
+	var produks []web.ProdukResponse
+	for _, produk := range result {
+		produks = append(produks, helper.ToProdukResponse(produk))
+	}
 
-    if err := tx.Commit(); err != nil {
-        return web.ProdukPaginationResponse{}, err
-    }
+	if err := tx.Commit(); err != nil {
+		return web.ProdukPaginationResponse{}, helper.Internal("gagal menyelesaikan transaksi", err)
+	}
 
-    return web.ProdukPaginationResponse{
-        Data:      produks,
-        Page:      page,
-        Limit:     limit,
-        TotalData: totalData,
-        TotalPage: totalPage,
-    }, nil
+	return web.ProdukPaginationResponse{
+		Data:      produks,
+		Page:      page,
+		Limit:     limit,
+		TotalData: totalData,
+		TotalPage: totalPage,
+	}, nil
 }
 
-func(service *ProdukServcieImpl)CreateProduk(ctx context.Context,produk web.ProdukRequest)(web.ProdukResponse,error){
-	tx,err := service.DB.Begin()
+func (service *ProdukServcieImpl) CreateProduk(ctx context.Context, produk web.ProdukRequest) (web.ProdukResponse, error) {
+	tx, err := service.DB.Begin()
 	if err != nil {
-		panic(err)
+		return web.ProdukResponse{}, helper.Internal("gagal memulai transaksi", err)
 	}
+	defer tx.Rollback()
 	request := domain.Produk{
-		Nama: produk.Name,
+		Nama:  produk.Name,
 		Harga: produk.Harga,
 	}
-	
-	response,err := service.ProdukRepository.CreateProduk(ctx,tx,request)
-	err = tx.Commit()
-    if err != nil {
-        return web.ProdukResponse{}, err
-    }
-	helper.PanicIfError(err)
-	return helper.ToProdukResponse(response),nil
+
+	response, err := service.ProdukRepository.CreateProduk(ctx, tx, request)
+	if err != nil {
+		return web.ProdukResponse{}, helper.ToAppError(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return web.ProdukResponse{}, helper.Internal("gagal menyelesaikan transaksi", err)
+	}
+	return helper.ToProdukResponse(response), nil
 }
 
-func(service *ProdukServcieImpl)GetById(ctx context.Context,IdProduk int)(web.ProdukResponse,error){
-	tx,err := service.DB.Begin()
+func (service *ProdukServcieImpl) GetById(ctx context.Context, IdProduk int) (web.ProdukResponse, error) {
+	tx, err := service.DB.Begin()
 	if err != nil {
-		return web.ProdukResponse{},errors.New(err.Error())
+		return web.ProdukResponse{}, helper.Internal("gagal memulai transaksi", err)
 	}
-	response,err := service.ProdukRepository.GetById(ctx,tx,IdProduk)
+	defer tx.Rollback()
+	response, err := service.ProdukRepository.GetById(ctx, tx, IdProduk)
 	if err != nil {
-		return web.ProdukResponse{},errors.New(err.Error())
+		return web.ProdukResponse{}, helper.ToAppError(err)
 	}
-	return helper.ToProdukResponse(response),nil
+	return helper.ToProdukResponse(response), nil
 }
 
-func(service *ProdukServcieImpl)Delete(ctx context.Context,idProduk int)error{
-	tx,err := service.DB.Begin()
+func (service *ProdukServcieImpl) Delete(ctx context.Context, idProduk int) error {
+	tx, err := service.DB.Begin()
 	if err != nil {
-		return err
+		return helper.Internal("gagal memulai transaksi", err)
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	err = service.ProdukRepository.Delete(ctx, tx, idProduk)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return helper.ToAppError(err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return err
+		return helper.Internal("gagal menyelesaikan transaksi", err)
 	}
 	return nil
 }
 
-func(service *ProdukServcieImpl)Update(ctx context.Context,idProduk int,produk web.ProdukRequest)(web.ProdukResponse,error){
-	tx,err := service.DB.Begin()
-	if err != nil {
-		return web.ProdukResponse{},err
-	}
-
-	request := domain.Produk{
-		Nama: produk.Name,
-		Harga: produk.Harga,
-	}
-	response,err := service.ProdukRepository.Update(ctx,tx,idProduk,request)
-	if err != nil {
-		return web.ProdukResponse{},err
-	}
-	err = tx.Commit()
+func (service *ProdukServcieImpl) Update(ctx context.Context, idProduk int, produk web.ProdukRequest) (web.ProdukResponse, error) {
+    tx, err := service.DB.Begin()
     if err != nil {
-        return web.ProdukResponse{}, err
+        return web.ProdukResponse{}, helper.Internal("gagal memulai transaksi", err)
     }
-	return helper.ToProdukResponse(response),nil
+    defer tx.Rollback()
+
+    request := domain.Produk{
+        Nama:  produk.Name,
+        Harga: produk.Harga,
+    }
+    response, err := service.ProdukRepository.Update(ctx, tx, idProduk, request)
+    if err != nil {
+        return web.ProdukResponse{}, helper.ToAppError(err)
+    }
+
+    if err = tx.Commit(); err != nil {
+        return web.ProdukResponse{}, helper.Internal("gagal menyelesaikan transaksi", err)
+    }
+    return helper.ToProdukResponse(response), nil
 }

@@ -20,7 +20,7 @@ package service_test
 //     request := web.RegistrasiRequest{
 //         Name:   "tenant_test",
 //         Password: "cobacoba",
-       
+
 //     }
 
 //     ctx := context.Background()
