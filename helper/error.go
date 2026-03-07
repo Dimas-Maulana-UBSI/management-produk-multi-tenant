@@ -23,7 +23,6 @@ func (e *AppError) Error() string {
 	return e.Message
 }
 
-// Constructors for common HTTP errors
 func NewAppError(status int, message string, err error) *AppError {
 	return &AppError{StatusCode: status, Message: message, Err: err}
 }

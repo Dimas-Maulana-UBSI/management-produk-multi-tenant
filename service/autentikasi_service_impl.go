@@ -9,6 +9,8 @@ import (
 	"management-produk/repository"
 	"os"
 	"strconv"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AutentikasiServiceImpl struct {
@@ -37,7 +39,7 @@ func (service AutentikasiServiceImpl) Login(ctx context.Context, request web.Log
 	if err != nil {
 		return web.LoginResponse{}, helper.ToAppError(err)
 	}
-	if request.Password != row.DBPassword {
+	if err := bcrypt.CompareHashAndPassword([]byte(row.DBPassword), []byte(request.Password)); err != nil {
 		return web.LoginResponse{}, helper.Unauthorized("password salah")
 	}
 
@@ -52,6 +54,10 @@ func (service AutentikasiServiceImpl) Registrasi(ctx context.Context, request we
 	}
 	defer tx.Rollback()
 	dbPort, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return web.RegistrasiResponse{}, helper.Internal("gagal hash password", err)
+	}
 	tenantRequest := domain.Tenant{
 		Name:       request.Name,
 		DBHost:     os.Getenv("DB_HOST"),
@@ -59,7 +65,7 @@ func (service AutentikasiServiceImpl) Registrasi(ctx context.Context, request we
 		ApiKey:     helper.GenerateApiKey(10),
 		DBName:     ("db_" + request.Name),
 		DBUser:     request.Name,
-		DBPassword: request.Password,
+		DBPassword: string(hashPassword),
 		Status:     "active",
 	}
 	tenant, err := service.AutentikasiRepository.CreateUser(ctx, tx, tenantRequest)
