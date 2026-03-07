@@ -43,7 +43,7 @@ management-produk-multi-tenant/
 
 1. Clone repository
 ```bash
-git clone <repo-url>
+git clone https://github.com/Dimas-Maulana-UBSI/management-produk-multi-tenant
 cd management-produk-multi-tenant
 ```
 
@@ -116,35 +116,39 @@ migrate -path db/migrations -database "mysql://root:password@tcp(localhost:3306)
 ### Auth
 | Method | Endpoint | Keterangan |
 |---|---|---|
-| POST | `/auth/register` | Registrasi tenant baru |
-| POST | `/auth/login` | Login tenant |
+| GET | `/login` | Halaman login |
+| POST | `/login` | Login tenant |
+| GET | `/register` | Halaman register |
+| POST | `/register` | Registrasi tenant baru |
+| GET | `/home` | Dashboard tenant |
 
 ### Produk
 > Semua endpoint produk memerlukan header `X-API-Key`
 
 | Method | Endpoint | Keterangan |
 |---|---|---|
-| GET | `/api/produk` | List produk (support pagination) |
-| POST | `/api/produk` | Tambah produk |
-| GET | `/api/produk/:idProduk` | Detail produk |
-| PUT | `/api/produk/:idProduk` | Update produk |
-| DELETE | `/api/produk/:idProduk` | Hapus produk |
+| GET | `/produk` | List produk (support pagination) |
+| POST | `/produk` | Tambah produk |
+| GET | `/produk/:idProduk` | Detail produk |
+| PUT | `/produk/:idProduk` | Update produk |
+| DELETE | `/produk/:idProduk` | Hapus produk |
 
 **Contoh request list produk:**
 ```bash
-curl -X GET "http://localhost:3000/api/produk?page=1&limit=10" \
+curl -X GET "http://localhost:3000/produk?page=1&limit=10" \
   -H "X-API-Key: your_api_key"
 ```
 
 **Contoh request tambah produk:**
 ```bash
-curl -X POST "http://localhost:3000/api/produk" \
+curl -X POST "http://localhost:3000/produk" \
   -H "X-API-Key: your_api_key" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Produk A", "harga": 10000}'
+  -d '{"nama": "Produk A", "harga": 10000}'
 ```
 
 ## Testing
 ```bash
 go test ./...
 ```
+
