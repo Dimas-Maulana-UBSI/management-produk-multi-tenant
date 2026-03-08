@@ -7,4 +7,6 @@ type AutentikasiController interface {
 	LoginView(ctx *fiber.Ctx) error
 	Register(ctx *fiber.Ctx) error
 	RegisterView(ctx *fiber.Ctx) error
+	HomeView(ctx *fiber.Ctx) error
+	Logout(ctx *fiber.Ctx)error
 }
